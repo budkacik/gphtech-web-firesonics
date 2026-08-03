@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FireSonics — Listening for wildfire, before it spreads</title>
+  <meta name="description" content="FireSonics detects wildfire ignition within minutes using AI-driven acoustic sensor networks." />
+
+  <!-- ================================================================
+       BRANDING / META — replace title, description, and og-image above
+       and the favicon link below with your own.
+       ================================================================ -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <meta property="og:title" content="FireSonics" />
+  <meta property="og:description" content="AI-powered wildfire detection through intelligent acoustic monitoring." />
+  <meta property="og:image" content="assets/images/og-image.svg" />
+
+  <!-- Fonts: Space Grotesk (display) + Inter (body) + IBM Plex Mono (telemetry/data accents) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       NAV
+       ============================================================ -->
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a href="#hero" class="nav__brand">
+        <img src="assets/logo.svg" alt="FireSonics logo" class="nav__logo" />
+        <span style="font-family:Lovelo, sans-serif; color: #E21E20;">Fire</span><span style="font-family:Lovelo, sans-serif; color: #ffffff; margin-left: -10px;">Sonics</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#features">System</a>
+        <a href="#about">About</a>
+        <a href="#technology">Technology</a>
+        <a href="#team">Team</a>
+        <a href="#reel" class="nav__cta">Learn more</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO — fullscreen opening section
+       ============================================================ -->
+  <section class="hero" id="hero">
+    <canvas id="hero-noise" class="hero__noise" aria-hidden="true"></canvas>
+
+    <div class="hero__content">
+      <!-- PLACEHOLDER: swap assets/logo.svg for your real mark -->
+      
+
+      <h1 class="hero__title" data-reveal style="margin-right: 75px;">
+        <img src="assets/logo.svg" alt="FireSonics logo" class="hero__logo" data-reveal />
+        <span class="hero__title-line" style="color: #E21E20;">Fire</span><span class="hero__title-line hero__title-accent" style="color: #ffffff">Sonics</span>
+      </h1>
+
+      <p class="hero__subtitle" data-reveal>
+        AI-powered wildfire detection through intelligent acoustic monitoring.
+      </p>
+
+      <div class="hero__actions" data-reveal>
+        <!-- PLACEHOLDER: point this at your demo, waitlist, or docs -->
+        <a href="#contact" class="btn btn--primary">Learn more</a>
+      </div>
+    </div>
+
+    <button class="hero__scroll" id="scroll-indicator" aria-label="Scroll to explore">
+      <span class="hero__scroll-line"></span>
+      <span class="hero__scroll-label">Scroll</span>
+    </button>
+  </section>
+
+  <!-- ============================================================
+       PINNED SCROLL-SCRUBBED CANVAS ANIMATION
+       Replace assets/frames/0001.webp ... NNNN.webp with your own
+       transparent WebP sequence rendered from Blender. Update
+       FRAME_COUNT in script.js to match your total frame count.
+       ============================================================ -->
+  <section class="reel" id="reel">
+    <div class="reel__pin">
+      <canvas id="reel-canvas" class="reel__canvas"></canvas>
+      <div class="reel__caption">
+        <p class="eyebrow">01 — Detection in motion</p>
+        <h2>Every second of sound, analyzed.</h2>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <span>© <span id="year"></span> FireSonics. All rights reserved.</span>
+      <span class="footer__meta">Built with HTML, CSS &amp; vanilla JS.</span>
+    </div>
+  </footer>
+
+  <!-- GSAP + ScrollTrigger from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
