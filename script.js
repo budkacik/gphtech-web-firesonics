@@ -210,18 +210,37 @@ function initReel(frameCount, framePath) {
   // smoothing on top of raw scroll input, then we paint from its value.
   const playhead = { frame: 0 };
 
-  ScrollTrigger.create({
+ScrollTrigger.create({
     trigger: "#reel",
     start: "top top",
     end: "bottom bottom",
     scrub: 0.4,
+    // Snap scroll progress itself to whole-frame steps once scrolling
+    // stops, so the reel never rests on a fractional (blended/blurry)
+    // frame — it always settles on a single crisp still.
+    snap: {
+      snapTo: 1 / (frameCount - 1),
+      duration: 0.2,
+      ease: "power1.out",
+    },
     onUpdate: (self) => {
+      const target = self.progress * (frameCount - 1);
       gsap.to(playhead, {
-        frame: self.progress * (frameCount - 1),
+        frame: target,
         duration: 0.3,
         ease: "power1.out",
         overwrite: true,
         onUpdate: () => drawFrame(playhead.frame),
+        onComplete: () => {
+          // Force an exact integer frame if we've landed within a hair
+          // of one, so the final paint is guaranteed sharp even after
+          // float drift (e.g. 45.0000004).
+          const rounded = Math.round(playhead.frame);
+          if (Math.abs(playhead.frame - rounded) < 0.01) {
+            playhead.frame = rounded;
+            drawFrame(rounded);
+          }
+        },
       });
     },
   });
