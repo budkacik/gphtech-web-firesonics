@@ -1,106 +1,823 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FireSonics — Listening for wildfire, before it spreads</title>
-  <meta name="description" content="FireSonics detects wildfire ignition within minutes using AI-driven acoustic sensor networks." />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FireSonics — A forest can't scream for help</title>
+<meta name="description" content="FireSonics listens for wildfire with a network of low-cost acoustic sensors and an AI model that tells fire apart from the rest of the forest.">
 
-  <!-- ================================================================
-       BRANDING / META — replace title, description, and og-image above
-       and the favicon link below with your own.
-       ================================================================ -->
-  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
-  <meta property="og:title" content="FireSonics" />
-  <meta property="og:description" content="AI-powered wildfire detection through intelligent acoustic monitoring." />
-  <meta property="og:image" content="assets/images/og-image.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,340..600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/lovelo" rel="stylesheet">
 
-  <!-- Fonts: Space Grotesk (display) + Inter (body) + IBM Plex Mono (telemetry/data accents) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#F2F0E7;
+  --bg-2:#E9E6DA;
+  --bg-3:#F8F6EF;
+  --ink:#1B2115;
+  --ink-dim:#58604C;
+  --ink-faint:#8B927E;
+  --line:rgba(27,33,21,0.18);
+  --line-soft:rgba(27,33,21,0.10);
+  --brand:#E21E20;
+  --ember:#FF5A2B;
+  --signal:#2E8B79;
+  --moss:#3EB6A0;
+  --radius:3px;
+}
 
-  <link rel="stylesheet" href="style.css" />
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; color-scheme:light; -webkit-text-size-adjust:100%; }
+
+body{
+  background:
+    radial-gradient(120% 70% at 50% -12%, rgba(200,70,27,0.08), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+h1,h2,h3{
+  font-family:'Fraunces', serif;
+  font-weight:460;
+  color:var(--ink);
+  letter-spacing:-0.01em;
+  line-height:1.08;
+}
+
+a{ color:inherit; }
+.mono{ font-family:'IBM Plex Mono', monospace; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 6vw; }
+
+::selection{ background:var(--ember); color:#fff; }
+
+/* ── NAV ── */
+header.site-nav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  background:rgba(242,240,231,0.85);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-row{
+  max-width:1180px; margin:0 auto; padding:0 6vw;
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+}
+.nav-brand{ display:flex; align-items:center; gap:6px; text-decoration:none; }
+.nav-brand .fire{ font-family:'Lovelo Black', 'Arial Black', sans-serif; font-size:1.1rem; color:var(--brand); }
+.nav-brand .sonics{ font-family:'Lovelo Black', 'Arial Black', sans-serif; font-size:1.1rem; color:var(--ink); }
+.nav-links{ display:flex; gap:26px; list-style:none; }
+.nav-links a{
+  text-decoration:none; font-family:'IBM Plex Mono', monospace; font-size:0.7rem;
+  letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-dim);
+  border-bottom:1px solid transparent; padding-bottom:3px;
+}
+.nav-links a:hover{ color:var(--ink); border-color:var(--ember); }
+.nav-right{ display:flex; align-items:center; gap:14px; }
+.lang-toggle{ display:flex; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+.lang-toggle button{
+  font-family:'IBM Plex Mono', monospace; font-size:0.7rem; background:none; border:none;
+  padding:7px 11px; cursor:pointer; color:var(--ink-faint); letter-spacing:0.06em;
+}
+.lang-toggle button.active{ background:var(--ink); color:var(--bg); }
+.hamburger{ display:none; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:6px; }
+.hamburger span{ width:20px; height:1.5px; background:var(--ink); }
+
+/* ── HERO ── */
+#hero{
+  padding:168px 0 96px;
+  position:relative;
+  overflow:hidden;
+}
+#hero::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(52% 44% at 10% 6%, rgba(226,30,32,0.06), transparent 62%),
+    radial-gradient(42% 52% at 92% 96%, rgba(62,182,160,0.08), transparent 60%);
+}
+.hero-grid{
+  position:relative; display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;
+}
+.hero-tag{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.04em; color:var(--ink-dim);
+  border:1px solid var(--line); border-radius:var(--radius); display:inline-flex; align-items:center; gap:9px;
+  padding:8px 13px; margin-bottom:30px; background:rgba(255,255,255,0.55);
+}
+.hero-tag::before{
+  content:""; width:7px; height:7px; border-radius:50%; background:var(--ember);
+  animation:tagdot 2.4s ease-out infinite;
+}
+.hero-tag b{ color:var(--ink); font-weight:600; }
+@keyframes tagdot{
+  0%{ box-shadow:0 0 0 0 rgba(255,90,43,0.55); }
+  70%{ box-shadow:0 0 0 9px rgba(255,90,43,0); }
+  100%{ box-shadow:0 0 0 0 rgba(255,90,43,0); }
+}
+h1.hero-title{
+  font-size:clamp(2.7rem,5.6vw,4.8rem);
+  line-height:1.03;
+  margin-bottom:24px;
+}
+h1.hero-title .line2{ color:var(--ink-dim); font-style:italic; font-weight:380; }
+.hero-lede{
+  max-width:48ch; color:var(--ink-dim); font-size:1.04rem; margin-bottom:32px;
+}
+.hero-actions{ display:flex; gap:22px; align-items:center; flex-wrap:wrap; }
+.btn{
+  font-weight:600; font-size:0.9rem;
+  padding:13px 24px; border-radius:var(--radius); text-decoration:none; display:inline-block;
+  border:1px solid transparent; transition:background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
+}
+.btn--solid{ background:var(--ember); color:#1B2115; }
+.btn--solid:hover{ background:var(--brand); color:#fff; transform:translateY(-1px); }
+.btn--ghost{ color:var(--ink); text-decoration:underline; text-underline-offset:4px; padding:13px 6px; }
+.btn--ghost:hover{ color:var(--ember); }
+
+.hero-copy{ animation:rise .9s cubic-bezier(.16,1,.3,1) both; }
+.hero-visual{ position:relative; animation:rise .9s .12s cubic-bezier(.16,1,.3,1) both; }
+@keyframes rise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:none; } }
+
+.scope-box{
+  border:1px solid var(--line); background:#F8F6EF;
+  border-radius:var(--radius); padding:16px 16px 12px;
+  box-shadow:0 30px 60px -45px rgba(27,33,21,0.35);
+}
+.scope-head{
+  display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace;
+  font-size:0.66rem; letter-spacing:0.08em; color:var(--ink-faint); margin-bottom:10px;
+}
+.scope-head .status{ color:var(--signal); }
+.scope-head .status.fire{ color:var(--brand); }
+#scope{
+  width:100%; height:220px; display:block;
+  background:#FBFAF4; border:1px solid var(--line-soft);
+}
+.scope-foot{
+  display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace;
+  font-size:0.64rem; color:var(--ink-faint); margin-top:9px; letter-spacing:0.04em;
+}
+
+@media (max-width:900px){
+  .hero-grid{ grid-template-columns:1fr; gap:44px; }
+}
+
+/* ── SECTION SCAFFOLDING ── */
+section{ padding:92px 0; border-top:1px solid var(--line); }
+section:first-of-type{ border-top:none; }
+.sec-num{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.14em;
+  color:var(--brand); display:inline-flex; align-items:center; gap:12px;
+  margin-bottom:20px; text-transform:uppercase;
+}
+.sec-num::after{ content:""; width:38px; height:1px; background:var(--line); }
+.sec-head{ max-width:780px; margin-bottom:52px; }
+.sec-head h2{ font-size:clamp(1.9rem,3.4vw,2.7rem); margin-bottom:16px; }
+.sec-head p{ color:var(--ink-dim); font-size:1rem; max-width:62ch; }
+
+/* ── PROBLEM ── */
+.problem-list{ display:flex; flex-direction:column; }
+.problem-row{
+  display:grid; grid-template-columns:190px 1fr; gap:36px; padding:26px 0;
+  border-top:1px solid var(--line-soft);
+}
+.problem-row:first-child{ border-top:1px solid var(--line); }
+.problem-row .method{ font-family:'Fraunces', serif; font-weight:480; font-size:1.2rem; }
+.problem-row .desc{ color:var(--ink-dim); max-width:62ch; }
+.problem-close{ margin-top:44px; max-width:62ch; color:var(--ink); font-size:1.06rem; border-left:2px solid var(--ember); padding-left:22px; }
+@media (max-width:700px){ .problem-row{ grid-template-columns:1fr; gap:8px; } }
+
+/* ── SEQUENCE (how it works) ── */
+.sequence{ display:flex; gap:0; overflow-x:auto; padding-bottom:8px; }
+.seq-step{
+  flex:1 1 0; min-width:190px; position:relative; padding:0 24px 0 0;
+}
+.seq-step .num{
+  font-family:'IBM Plex Mono', monospace; font-size:0.76rem; color:var(--ink);
+  background:var(--bg-2); border:1px solid var(--line); width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+  transition: background .35s ease, color .35s ease, border-color .35s ease;
+}
+.seq-step.active .num{ background:var(--ember); border-color:var(--ember); color:#1B2115; }
+.seq-step .rule{
+  position:absolute; top:15px; left:30px; right:0; height:1px; background:var(--line);
+}
+.seq-step:last-child .rule{ display:none; }
+.seq-step h3{ font-size:1.1rem; margin-bottom:8px; font-weight:540; }
+.seq-step p{ color:var(--ink-dim); font-size:0.9rem; max-width:26ch; }
+@media (max-width:860px){
+  .sequence{ flex-direction:column; }
+  .seq-step{ padding:0 0 30px 0; }
+  .seq-step .rule{ top:30px; left:15px; right:auto; width:1px; height:calc(100% - 30px); }
+}
+
+/* ── WHY SOUND ── */
+.confound-wrap{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:60px; align-items:start; }
+.ai-text{ max-width:60ch; color:var(--ink-dim); font-size:1.03rem; }
+.ai-text strong{ color:var(--ink); font-weight:600; }
+.confound-list{ list-style:none; display:flex; flex-direction:column; }
+.confound-list li{
+  font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--ink-dim);
+  padding:13px 0; border-bottom:1px solid var(--line-soft); display:flex; gap:14px;
+}
+.confound-list li::before{ content:'—'; color:var(--ember); }
+@media (max-width:860px){ .confound-wrap{ grid-template-columns:1fr; gap:34px; } }
+
+/* ── STATS (AI/dataset) ── */
+.stat-row{ display:flex; gap:72px; flex-wrap:wrap; margin-bottom:44px; padding-bottom:42px; border-bottom:1px solid var(--line); }
+.stat{ min-width:150px; }
+.stat .num{ font-family:'Fraunces', serif; font-weight:440; font-size:3rem; color:var(--ember); line-height:1; }
+.stat .label{ color:var(--ink-dim); font-size:0.85rem; margin-top:12px; max-width:22ch; }
+.ai-note{
+  margin-top:32px; padding:20px 22px; background:rgba(62,182,160,0.07);
+  border-left:2px solid var(--signal); max-width:64ch; font-size:0.95rem;
+}
+
+/* ── HARDWARE ── */
+#hardware{ background:var(--bg-2); }
+.hw-grid{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:60px; align-items:center; }
+.hw-visual{ display:flex; justify-content:center; }
+.node-canvas{ display:block; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 20px 40px -30px rgba(27,33,21,0.35); }
+.spec-rows{ display:flex; flex-direction:column; margin-top:26px; }
+.spec-row{ display:flex; justify-content:space-between; gap:16px; padding:13px 0; border-bottom:1px solid var(--line-soft); font-size:0.93rem; }
+.spec-row .k{ color:var(--ink-dim); }
+.spec-row .v{ font-family:'IBM Plex Mono', monospace; font-size:0.84rem; text-align:right; }
+@media (max-width:860px){ .hw-grid{ grid-template-columns:1fr; } }
+
+.pulse{ animation: pulse 2.6s ease-out infinite; transform-origin:center; }
+@keyframes pulse{
+  0%{ opacity:0.55; transform:scale(0.9); }
+  70%{ opacity:0; transform:scale(1.6); }
+  100%{ opacity:0; transform:scale(1.6); }
+}
+
+/* ── SCALABILITY ── */
+.scale-list{ list-style:none; display:flex; flex-direction:column; max-width:70ch; }
+.scale-list li{ padding:20px 0; border-top:1px solid var(--line-soft); display:grid; grid-template-columns:160px 1fr; gap:24px; }
+.scale-list li:first-child{ border-top:1px solid var(--line); }
+.scale-list .term{ font-family:'Fraunces', serif; font-weight:500; color:var(--ink); font-size:1.05rem; }
+.scale-list .def{ color:var(--ink-dim); }
+@media (max-width:700px){ .scale-list li{ grid-template-columns:1fr; gap:6px; } }
+
+/* ── RESULTS ── */
+.results-band{
+  display:flex; gap:56px; flex-wrap:wrap; margin-bottom:36px; padding-bottom:36px; border-bottom:1px solid var(--line);
+}
+.results-band .stat .num{ color:var(--ink); }
+.demo-note{ max-width:64ch; color:var(--ink-dim); }
+.demo-note strong{ color:var(--ink); }
+
+/* ── TEAM ── */
+#team{ background:var(--bg-2); }
+.team-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:40px; flex-wrap:wrap; }
+.team-copy{ max-width:54ch; color:var(--ink-dim); font-size:1.04rem; }
+.team-copy strong{ color:var(--ink); font-weight:600; }
+.team-links{ display:flex; flex-direction:column; gap:12px; }
+.team-links a{ font-family:'IBM Plex Mono', monospace; font-size:0.82rem; text-decoration:none; border-bottom:1px solid var(--line); padding-bottom:4px; }
+.team-links a:hover{ color:var(--ember); border-color:var(--ember); }
+
+/* ── CONTACT ── */
+#contact{ padding-bottom:52px; }
+.contact-grid{ display:flex; justify-content:space-between; gap:48px; flex-wrap:wrap; }
+.contact-block h3{ font-size:1.34rem; margin-bottom:18px; font-weight:520; }
+.contact-list{ display:flex; flex-direction:column; gap:12px; }
+.contact-list a{ text-decoration:none; font-size:0.95rem; color:var(--ink-dim); }
+.contact-list a:hover{ color:var(--ember); }
+
+footer{
+  border-top:1px solid var(--line); padding:30px 0; font-size:0.8rem; color:var(--ink-faint);
+}
+.footer-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+footer a{ color:var(--ink-faint); text-decoration:none; }
+footer a:hover{ color:var(--ember); }
+
+/* ── ENTRANCE REVEALS ── */
+.rv{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+.rv.in{ opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .rv{ opacity:1 !important; transform:none !important; transition:none !important; }
+  .hero-copy, .hero-visual{ animation:none; }
+}
+
+@media (max-width:720px){
+  #hero{ padding:132px 0 64px; }
+  .nav-links{ display:none; }
+  .nav-links.open{
+    display:flex; flex-direction:column; position:fixed; top:64px; left:0; right:0;
+    background:var(--bg); padding:22px 6vw; gap:18px; border-bottom:1px solid var(--line); z-index:40;
+  }
+  .hamburger{ display:flex; }
+  section{ padding:64px 0; }
+  .stat-row{ gap:44px; }
+}
+</style>
 </head>
 <body>
 
-  <!-- ============================================================
-       NAV
-       ============================================================ -->
-  <header class="nav" id="nav">
-    <div class="nav__inner">
-      <a href="#hero" class="nav__brand">
-        <img src="assets/logo.svg" alt="FireSonics logo" class="nav__logo" />
-        <span style="font-family:Lovelo, sans-serif; color: #E21E20;">Fire</span><span style="font-family:Lovelo, sans-serif; color: #ffffff; margin-left: -10px;">Sonics</span>
-      </a>
-      <nav class="nav__links">
-        <a href="#features">System</a>
-        <a href="#about">About</a>
-        <a href="#technology">Technology</a>
-        <a href="#team">Team</a>
-        <a href="#reel" class="nav__cta">Learn more</a>
-      </nav>
+<header class="site-nav">
+  <div class="nav-row">
+    <a href="#hero" class="nav-brand"><span class="fire">Fire</span><span class="sonics">Sonics</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#problem" data-en="Problem" data-sk="Problém">Problem</a></li>
+      <li><a href="#how" data-en="How it works" data-sk="Ako to funguje">How it works</a></li>
+      <li><a href="#ai" data-en="AI &amp; data" data-sk="AI a dáta">AI &amp; data</a></li>
+      <li><a href="#hardware" data-en="Hardware" data-sk="Hardware">Hardware</a></li>
+      <li><a href="#results" data-en="Results" data-sk="Výsledky">Results</a></li>
+      <li><a href="#team" data-en="Team" data-sk="Tím">Team</a></li>
+    </ul>
+    <div class="nav-right">
+      <div class="lang-toggle">
+        <button class="active" onclick="setLang('en')">EN</button>
+        <button onclick="setLang('sk')">SK</button>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <!-- ============================================================
-       HERO — fullscreen opening section
-       ============================================================ -->
-  <section class="hero" id="hero">
-    <canvas id="hero-noise" class="hero__noise" aria-hidden="true"></canvas>
-
-    <div class="hero__content">
-      <!-- PLACEHOLDER: swap assets/logo.svg for your real mark -->
-      
-
-      <h1 class="hero__title" data-reveal style="margin-right: 75px;">
-        <img src="assets/logo.svg" alt="FireSonics logo" class="hero__logo" data-reveal />
-        <span class="hero__title-line" style="color: #E21E20;">Fire</span><span class="hero__title-line hero__title-accent" style="color: #ffffff">Sonics</span>
+<!-- ============ HERO ============ -->
+<section id="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="hero-tag" data-en='Semifinalist · FIRST Global Challenge 2026 · <b>Top 15 of 81 countries</b>' data-sk='Semifinalista · FIRST Global Challenge 2026 · <b>15 najlepších zo 81 krajín</b>'>Semifinalist · FIRST Global Challenge 2026 · <b>Top 15 of 81 countries</b></span>
+      <h1 class="hero-title">
+        <span data-en="A forest can't scream" data-sk="Les nemôže zakričať">A forest can't scream</span><br>
+        <span class="line2" data-en="for help. So we gave it a voice." data-sk="o pomoc. Tak sme mu dali hlas.">for help. So we gave it a voice.</span>
       </h1>
-
-      <p class="hero__subtitle" data-reveal>
-        AI-powered wildfire detection through intelligent acoustic monitoring.
+      <p class="hero-lede" data-en="FireSonics is a network of low-cost microphones that listens to the forest and flags a fire within minutes — using sound, which travels around the smoke and terrain that block cameras and satellites." data-sk="FireSonics je sieť lacných mikrofónov, ktorá počúva les a upozorní na požiar v priebehu minút — pomocou zvuku, ktorý sa šíri aj cez dym a terén, kde kamery a satelity strácajú výhľad.">
+        FireSonics is a network of low-cost microphones that listens to the forest and flags a fire within minutes — using sound, which travels around the smoke and terrain that block cameras and satellites.
       </p>
-
-      <div class="hero__actions" data-reveal>
-        <!-- PLACEHOLDER: point this at your demo, waitlist, or docs -->
-        <a href="#contact" class="btn btn--primary">Learn more</a>
+      <div class="hero-actions">
+        <a href="#how" class="btn btn--solid" data-en="See how it works" data-sk="Ako to funguje">See how it works</a>
+        <a href="https://gphtech.sk" target="_blank" class="btn btn--ghost" data-en="Built by GPHTech →" data-sk="Vytvoril GPHTech →">Built by GPHTech →</a>
       </div>
     </div>
 
-    <button class="hero__scroll" id="scroll-indicator" aria-label="Scroll to explore">
-      <span class="hero__scroll-line"></span>
-      <span class="hero__scroll-label">Scroll</span>
-    </button>
-  </section>
-
-  <!-- ============================================================
-       PINNED SCROLL-SCRUBBED CANVAS ANIMATION
-       Replace assets/frames/0001.webp ... NNNN.webp with your own
-       transparent WebP sequence rendered from Blender. Update
-       FRAME_COUNT in script.js to match your total frame count.
-       ============================================================ -->
-  <section class="reel" id="reel">
-    <div class="reel__pin">
-      <canvas id="reel-canvas" class="reel__canvas"></canvas>
-      <div class="reel__caption">
-        <p class="eyebrow">01 — Detection in motion</p>
-        <h2>Every second of sound, analyzed.</h2>
+    <div class="hero-visual">
+      <div class="scope-box">
+        <div class="scope-head">
+          <span data-en="LIVE INPUT — NODE 04" data-sk="ŽIVÝ VSTUP — UZOL 04">LIVE INPUT — NODE 04</span>
+          <span class="status" id="scopeStatus" data-en="listening" data-sk="počúva">listening</span>
+        </div>
+        <canvas id="scope"></canvas>
+        <div class="scope-foot">
+          <span data-en="ambient forest audio" data-sk="okolitý zvuk lesa">ambient forest audio</span>
+          <span class="mono">44.1kHz</span>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer class="footer">
-    <div class="footer__inner">
-      <span>© <span id="year"></span> FireSonics. All rights reserved.</span>
-      <span class="footer__meta">Built with HTML, CSS &amp; vanilla JS.</span>
+<!-- ============ PROBLEM ============ -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 data-en="Fire moves faster than we can see it." data-sk="Požiar sa šíri rýchlejšie, než ho vidno.">Fire moves faster than we can see it.</h2>
+      <p data-en="Hundreds of forest fires ignite every year before anyone notices. Every method we rely on today has the same blind spot: it needs a clear line of sight." data-sk="Každý rok vzniknú stovky lesných požiarov skôr, než si ich niekto všimne. Všetky metódy, na ktoré sa dnes spoliehame, majú rovnaký problém: potrebujú priamy výhľad.">
+        Hundreds of forest fires ignite every year before anyone notices. Every method we rely on today has the same blind spot: it needs a clear line of sight.
+      </p>
     </div>
-  </footer>
 
-  <!-- GSAP + ScrollTrigger from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="script.js"></script>
+    <div class="problem-list">
+      <div class="problem-row">
+        <div class="method" data-en="Human observation" data-sk="Pozorovanie ľudmi">Human observation</div>
+        <div class="desc" data-en="Needs someone to see or smell it first — and their sense of distance and direction is often rough, which delays and misdirects the response." data-sk="Vyžaduje, aby si ho niekto najprv všimol — a odhad vzdialenosti a smeru je zvyčajne nepresný, čo spomaľuje a zle smeruje zásah.">Needs someone to see or smell it first — and their sense of distance and direction is often rough, which delays and misdirects the response.</div>
+      </div>
+      <div class="problem-row">
+        <div class="method" data-en="Cameras" data-sk="Kamery">Cameras</div>
+        <div class="desc" data-en="Depend on a direct sightline. Dense vegetation, terrain, darkness, and the fire's own smoke all work against it." data-sk="Potrebujú priamy výhľad. Hustá vegetácia, terén, tma a dym samotného požiaru im stoja v ceste.">Depend on a direct sightline. Dense vegetation, terrain, darkness, and the fire's own smoke all work against it.</div>
+      </div>
+      <div class="problem-row">
+        <div class="method" data-en="Satellites" data-sk="Satelity">Satellites</div>
+        <div class="desc" data-en="Cover enormous areas, but weren't built to catch a fire in the first minutes after ignition." data-sk="Pokrývajú obrovské plochy, ale nie sú stavané na to, aby zachytili požiar v prvých minútach po vzniku.">Cover enormous areas, but weren't built to catch a fire in the first minutes after ignition.</div>
+      </div>
+    </div>
 
+    <p class="problem-close" data-en="Sound travels around the obstacles that block sight. A fire's crackle carries through trees and even through smoke — which is why FireSonics listens, instead of watching." data-sk="Zvuk sa šíri aj cez prekážky, ktoré blokujú výhľad. Praskanie ohňa sa prenáša cez stromy aj cez dym — preto FireSonics počúva, nie sleduje.">
+      Sound travels around the obstacles that block sight. A fire's crackle carries through trees and even through smoke — which is why FireSonics listens, instead of watching.
+    </p>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 data-en="From a crackle in the woods to an alert on a map." data-sk="Od praskania v lese až po upozornenie na mape.">From a crackle in the woods to an alert on a map.</h2>
+      <p data-en="Every node runs the same short pipeline, continuously." data-sk="Každý uzol nepretržite spracúva tento krátky proces.">Every node runs the same short pipeline, continuously.</p>
+    </div>
+
+    <div class="sequence" id="sequence">
+      <div class="seq-step"><div class="num">1</div><div class="rule"></div>
+        <h3 data-en="Listen" data-sk="Počúvanie">Listen</h3>
+        <p data-en="A microphone at the node picks up the ambient forest sound." data-sk="Mikrofón na uzle zachytáva okolitý zvuk lesa.">A microphone at the node picks up the ambient forest sound.</p>
+      </div>
+      <div class="seq-step"><div class="num">2</div><div class="rule"></div>
+        <h3 data-en="Transmit" data-sk="Prenos">Transmit</h3>
+        <p data-en="The audio is sent from the node to a central server." data-sk="Zvuk sa z uzla odosiela na centrálny server.">The audio is sent from the node to a central server.</p>
+      </div>
+      <div class="seq-step"><div class="num">3</div><div class="rule"></div>
+        <h3 data-en="Analyze" data-sk="Analýza">Analyze</h3>
+        <p data-en="An AI model checks the sound against the acoustic pattern of fire." data-sk="AI model porovnáva zvuk s akustickým vzorom ohňa.">An AI model checks the sound against the acoustic pattern of fire.</p>
+      </div>
+      <div class="seq-step"><div class="num">4</div><div class="rule"></div>
+        <h3 data-en="Decide" data-sk="Rozhodnutie">Decide</h3>
+        <p data-en="The model classifies the sound as fire, or not fire." data-sk="Model vyhodnotí, či ide o oheň, alebo nie.">The model classifies the sound as fire, or not fire.</p>
+      </div>
+      <div class="seq-step"><div class="num">5</div>
+        <h3 data-en="Alert" data-sk="Upozornenie">Alert</h3>
+        <p data-en="The node's known location is used to estimate where the fire is." data-sk="Známa poloha uzlu sa použije na odhad miesta požiaru.">The node's known location is used to estimate where the fire is.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY SOUND ============ -->
+<section id="why">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 data-en="Sound is a hard signal, on purpose." data-sk="Zvuk je náročný signál, celkom zámerne.">Sound is a hard signal, on purpose.</h2>
+    </div>
+    <div class="confound-wrap">
+      <p class="ai-text" data-en="Burning material makes a distinct crackle and pop — but a forest is loud in its own right, and a system that cries wolf loses its usefulness fast. The real engineering problem isn't recognizing a fire recording. It's telling a real fire apart from a forest doing a good impression of one, without missing the real thing." data-sk="Horiaci materiál vytvára osobitý zvuk praskania — ale les je aj bez toho hlučné miesto, a systém, ktorý zbytočne planie poplach, rýchlo stratí dôveru. Skutočný technický problém nie je rozpoznať nahrávku ohňa. Je to odlíšiť skutočný požiar od lesa, ktorý ho dobre imituje, bez toho, aby sme skutočný požiar prehliadli.">
+        Burning material makes a distinct crackle and pop — but a forest is loud in its own right, and a system that cries wolf loses its usefulness fast. The real engineering problem isn't recognizing a fire recording. It's telling a real fire apart from a forest doing a good impression of one, without missing the real thing.
+      </p>
+      <ul class="confound-list">
+        <li data-en="Wind moving through branches" data-sk="Vietor v korunách stromov">Wind moving through branches</li>
+        <li data-en="Rain on leaves and ground" data-sk="Dážď na listoch a zemi">Rain on leaves and ground</li>
+        <li data-en="Insects and animals" data-sk="Hmyz a zvieratá">Insects and animals</li>
+        <li data-en="Vehicles and machinery" data-sk="Vozidlá a stroje">Vehicles and machinery</li>
+        <li data-en="People and forestry work" data-sk="Ľudia a lesné práce">People and forestry work</li>
+        <li data-en="Distant, unrelated human activity" data-sk="Vzdialená ľudská činnosť">Distant, unrelated human activity</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AI & DATASET ============ -->
+<section id="ai">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 data-en="Teaching a model what fire sounds like." data-sk="Ako naučiť model, ako znie oheň.">Teaching a model what fire sounds like.</h2>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num mono">~7,000</div>
+        <div class="label" data-en="recordings in the training dataset" data-sk="nahrávok v trénovacom datasete">recordings in the training dataset</div>
+      </div>
+      <div class="stat">
+        <div class="num mono">9 m</div>
+        <div class="label" data-en="fire audio detected through a wall, in a blind test" data-sk="oheň detegovaný cez stenu, v slepom teste">fire audio detected through a wall, in a blind test</div>
+      </div>
+      <div class="stat">
+        <div class="num mono">live</div>
+        <div class="label" data-en="inference runs directly on streamed microphone audio" data-sk="inferencia beží priamo na streamovanom zvuku z mikrofónu">inference runs directly on streamed microphone audio</div>
+      </div>
+    </div>
+
+    <p class="ai-text" data-en="The model is trained to recognize patterns in audio, rather than a fixed threshold — so it can pick up on the more complex, less obvious features of a fire's sound. To test whether it had actually learned those features, we played it fire recordings it had never heard during training. It correctly picked out a fire sound played from a phone in another room, roughly 9 meters away." data-sk="Model sa učí rozpoznávať vzory v zvuku, nie pevnú hranicu — vďaka tomu vie zachytiť aj zložitejšie, menej zjavné vlastnosti zvuku ohňa. Aby sme overili, či sa skutočne naučil tieto vlastnosti, prehrali sme mu nahrávky ohňa, ktoré počas tréningu nikdy nepočul. Správne rozpoznal zvuk ohňa prehrávaný z telefónu v inej miestnosti, približne 9 metrov od uzla.">
+      The model is trained to recognize patterns in audio, rather than a fixed threshold — so it can pick up on the more complex, less obvious features of a fire's sound. To test whether it had actually learned those features, we played it fire recordings it had never heard during training. It correctly picked out a fire sound played from a phone in another room, roughly 9 meters away.
+    </p>
+
+    <div class="ai-note" data-en="Next priority: false positives. We're expanding the dataset with wind, rain, and human activity, and testing how much the choice of microphone changes what the model can hear." data-sk="Ďalšia priorita: falošné poplachy. Rozširujeme dataset o vietor, dážď a ľudskú činnosť a testujeme, ako veľmi voľba mikrofónu ovplyvňuje to, čo model dokáže zachytiť.">
+      Next priority: false positives. We're expanding the dataset with wind, rain, and human activity, and testing how much the choice of microphone changes what the model can hear.
+    </div>
+  </div>
+</section>
+
+<!-- ============ HARDWARE (moved below — the project is software-first) ============ -->
+<section id="hardware">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 data-en="The node, kept intentionally simple." data-sk="Uzol, zámerne jednoduchý.">The node, kept intentionally simple.</h2>
+      <p data-en="A forest isn't watched by one sensor — it takes many. So each node has to be cheap enough to deploy at scale, without giving up on reliability." data-sk="Les nesleduje jeden senzor — treba ich viac. Preto musí byť každý uzol dosť lacný na hromadné nasadenie, bez straty spoľahlivosti.">A forest isn't watched by one sensor — it takes many. So each node has to be cheap enough to deploy at scale, without giving up on reliability.</p>
+    </div>
+
+    <div class="hw-grid">
+      <div class="hw-visual">
+        <canvas id="node-canvas" class="node-canvas" aria-label="FireSonics node — exploded view"></canvas>
+      </div>
+      <div>
+        <div class="spec-rows">
+          <div class="spec-row"><span class="k" data-en="Estimated cost / node" data-sk="Odhadovaná cena / uzol">Estimated cost / node</span><span class="v">~€80</span></div>
+          <div class="spec-row"><span class="k" data-en="Core sensor" data-sk="Hlavný senzor">Core sensor</span><span class="v" data-en="Microphone + on-board electronics" data-sk="Mikrofón + elektronika na palube">Microphone + on-board electronics</span></div>
+          <div class="spec-row"><span class="k" data-en="Placement" data-sk="Umiestnenie">Placement</span><span class="v" data-en="Distributed across forest terrain" data-sk="Rozmiestnené po lesnom teréne">Distributed across forest terrain</span></div>
+          <div class="spec-row"><span class="k" data-en="Trade-offs balanced" data-sk="Vyvažované kompromisy">Trade-offs balanced</span><span class="v" data-en="Mic quality, power, range, cost" data-sk="Kvalita mikrofónu, výkon, dosah, cena">Mic quality, power, range, cost</span></div>
+        </div>
+        <p style="margin-top:22px;color:var(--ink-dim);max-width:52ch" data-en="A lower price per unit is what makes a real network possible — but it can't come at the cost of missing the fire it was built to hear." data-sk="Nižšia cena za kus je to, čo robí skutočnú sieť reálnou — nemôže to však ísť na úkor toho, že uzol nezachytí požiar, na ktorý bol postavený.">A lower price per unit is what makes a real network possible — but it can't come at the cost of missing the fire it was built to hear.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCALABILITY ============ -->
+<section id="scale">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 data-en="One sensor can't watch a forest. A network can." data-sk="Jeden senzor neustráži les. Sieť áno.">One sensor can't watch a forest. A network can.</h2>
+    </div>
+    <ul class="scale-list">
+      <li>
+        <span class="term" data-en="Coverage" data-sk="Pokrytie">Coverage</span>
+        <span class="def" data-en="More nodes let the system watch a larger area at once." data-sk="Viac uzlov umožňuje sledovať naraz väčšiu oblasť.">More nodes let the system watch a larger area at once.</span>
+      </li>
+      <li>
+        <span class="term" data-en="Redundancy" data-sk="Redundancia">Redundancy</span>
+        <span class="def" data-en="When several nodes hear the same event, the system can cross-check them instead of trusting one sensor alone." data-sk="Keď viac uzlov zachytí tú istú udalosť, systém ich môže porovnať, nespolieha sa len na jeden senzor.">When several nodes hear the same event, the system can cross-check them instead of trusting one sensor alone.</span>
+      </li>
+      <li>
+        <span class="term" data-en="Localization" data-sk="Lokalizácia">Localization</span>
+        <span class="def" data-en="Knowing which nodes detected something helps narrow down where a fire actually is." data-sk="Vďaka informácii, ktoré uzly niečo zachytili, sa dá presnejšie určiť, kde požiar skutočne je.">Knowing which nodes detected something helps narrow down where a fire actually is.</span>
+      </li>
+      <li>
+        <span class="term" data-en="Deployment cost" data-sk="Náklady na nasadenie">Deployment cost</span>
+        <span class="def" data-en="At an estimated €80 a node, expanding the network stays far cheaper than adding imaging equipment at every point." data-sk="Pri odhadovanej cene 80 € za uzol je rozširovanie siete výrazne lacnejšie než dopĺňanie zobrazovacej techniky na každom mieste.">At an estimated €80 a node, expanding the network stays far cheaper than adding imaging equipment at every point.</span>
+      </li>
+      <li>
+        <span class="term" data-en="Flexible placement" data-sk="Flexibilné umiestnenie">Flexible placement</span>
+        <span class="def" data-en="Nodes can be positioned differently depending on terrain, vegetation, and fire risk." data-sk="Uzly možno rozmiestniť rôzne podľa terénu, vegetácie a rizika požiaru.">Nodes can be positioned differently depending on terrain, vegetation, and fire risk.</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 data-en="FIRST Global Challenge 2026 — Phase 2." data-sk="FIRST Global Challenge 2026 — Fáza 2.">FIRST Global Challenge 2026 — Phase 2.</h2>
+      <p data-en="This year's theme, 'Igniting Innovation', is about forest fires." data-sk="Tohtoročná témou súťaže, „Igniting Innovation“, sú lesné požiare.">This year's theme, 'Igniting Innovation', is about forest fires.</p>
+    </div>
+
+    <div class="results-band">
+      <div class="stat">
+        <div class="num mono">15 / 81</div>
+        <div class="label" data-en="semifinalist teams out of countries entered" data-sk="tímov v semifinále z krajín, ktoré sa zapojili">semifinalist teams out of countries entered</div>
+      </div>
+      <div class="stat">
+        <div class="num mono">Phase 2</div>
+        <div class="label" data-en="refining the model and hardware for Incheon" data-sk="doladenie modelu a hardvéru pre Inčchon">refining the model and hardware for Incheon</div>
+      </div>
+    </div>
+
+    <p class="demo-note" data-en="In Incheon, we plan to demonstrate the full pipeline, live: nodes placed around a simulated forest, exposed to a mix of real forest sounds, human activity, and a fire. A convincing demo has to do two things at once — catch the fire, and ignore everything else." data-sk="V Inčchone chceme naživo predviesť celý proces: uzly rozmiestnené v simulovanom lese, vystavené kombinácii skutočných lesných zvukov, ľudskej činnosti a ohňa. Presvedčivá ukážka musí zvládnuť dve veci naraz — zachytiť požiar a ignorovať všetko ostatné.">
+      In Incheon, we plan to demonstrate the full pipeline, live: nodes placed around a simulated forest, exposed to a mix of real forest sounds, human activity, and a fire. A convincing demo has to do two things at once — catch the fire, and ignore everything else.
+    </p>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section id="team">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <h2 data-en="Built by GPHTech." data-sk="Vytvoril GPHTech.">Built by GPHTech.</h2>
+    </div>
+    <div class="team-row">
+      <p class="team-copy" data-en="FireSonics is the New Technologies Experience project of <strong>GPHTech</strong>, the robotics team at Gymnázium Pavla Horova in Michalovce, Slovakia — 1st place at FIRST Global Slovakia, and one of 15 semifinalist teams worldwide." data-sk="FireSonics je projekt tímu <strong>GPHTech</strong> pre Výzvu nových technológií — robotického tímu Gymnázia Pavla Horova v Michalovciach, ktorý získal 1. miesto na FIRST Global Slovakia a postúpil medzi 15 semifinalistov na svete.">
+        FireSonics is the New Technologies Experience project of <strong>GPHTech</strong>, the robotics team at Gymnázium Pavla Horova in Michalovce, Slovakia — 1st place at FIRST Global Slovakia, and one of 15 semifinalist teams worldwide.
+      </p>
+      <div class="team-links">
+        <a href="https://gphtech.sk" target="_blank" data-en="Team site — gphtech.sk" data-sk="Stránka tímu — gphtech.sk">Team site — gphtech.sk</a>
+        <a href="https://www.instagram.com/gphtech2026/" target="_blank" data-en="Instagram — @gphtech2026" data-sk="Instagram — @gphtech2026">Instagram — @gphtech2026</a>
+        <a href="https://first.global/fgc/" target="_blank" data-en="FIRST Global Challenge" data-sk="FIRST Global Challenge">FIRST Global Challenge</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT / FOOTER ============ -->
+<section id="contact" style="padding-bottom:40px">
+  <div class="wrap contact-grid">
+    <div class="contact-block">
+      <h3 data-en="Get in touch" data-sk="Kontaktujte nás">Get in touch</h3>
+      <div class="contact-list">
+        <a href="mailto:info@gphtech.sk" data-en="info@gphtech.sk" data-sk="info@gphtech.sk">info@gphtech.sk</a>
+        <a href="tel:+421917543678">+421 917 543 678</a>
+      </div>
+    </div>
+    <div class="contact-block">
+      <h3 data-en="Support the trip to Korea" data-sk="Podporte cestu do Kórey">Support the trip to Korea</h3>
+      <div class="contact-list">
+        <a href="https://donio.sk/pomozte-nam-do-korey" target="_blank" data-en="Donio fundraiser" data-sk="Zbierka na Donio">Donio fundraiser</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-row">
+    <span data-en="FireSonics · GPHTech · Gymnázium Pavla Horova, Michalovce" data-sk="FireSonics · GPHTech · Gymnázium Pavla Horova, Michalovce">FireSonics · GPHTech · Gymnázium Pavla Horova, Michalovce</span>
+    <span><a href="https://gphtech.sk" target="_blank">gphtech.sk</a></span>
+  </div>
+</footer>
+
+<script>
+// ---- language toggle ----
+function setLang(lang){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-toggle button').forEach(b=>b.classList.toggle('active', b.textContent.trim().toLowerCase()===lang));
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    el.innerHTML = lang === 'sk' ? el.dataset.sk : el.dataset.en;
+  });
+}
+
+// ---- mobile nav ----
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', ()=> navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>navLinks.classList.remove('open')));
+
+// ---- hero oscilloscope: the one bold animated moment ----
+const canvas = document.getElementById('scope');
+const ctx = canvas.getContext('2d');
+let W, H;
+function sizeCanvas(){
+  const rect = canvas.getBoundingClientRect();
+  W = canvas.width = rect.width * devicePixelRatio;
+  H = canvas.height = 220 * devicePixelRatio;
+  canvas.style.height = '220px';
+  ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+}
+sizeCanvas();
+window.addEventListener('resize', sizeCanvas);
+
+let t = 0;
+let fireAt = 420;   // frame at which the fire event happens
+let frame = 0;
+const scopeStatus = document.getElementById('scopeStatus');
+const moss = getComputedStyle(document.documentElement).getPropertyValue('--moss').trim();
+const ember = getComputedStyle(document.documentElement).getPropertyValue('--ember').trim();
+const lineSoft = getComputedStyle(document.documentElement).getPropertyValue('--line-soft').trim();
+
+function draw(){
+  const w = canvas.clientWidth, h = 220;
+  ctx.clearRect(0,0,w,h);
+
+  // baseline grid
+  ctx.strokeStyle = lineSoft;
+  ctx.lineWidth = 1;
+  for(let gx=0; gx<w; gx+=28){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+  for(let gy=0; gy<h; gy+=28){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
+
+  const cyclePos = frame % 700;
+  const inFire = cyclePos > fireAt - 40 && cyclePos < fireAt + 90;
+
+  ctx.beginPath();
+  ctx.lineWidth = 1.6;
+  ctx.strokeStyle = inFire ? ember : moss;
+  for(let x=0; x<w; x++){
+    const px = x + frame*1.4;
+    let y = h/2 + Math.sin(px*0.045)*10 + Math.sin(px*0.011)*6;
+    // ambient noise
+    y += (Math.sin(px*0.9 + frame)*1.2) * (0.6+Math.sin(px*0.003));
+    // fire burst: sharp crackly spikes riding the baseline
+    const distToFire = Math.abs((x) - (fireAt - (frame % 700) + w*0.55));
+    if(inFire){
+      const spike = Math.sin(x*1.7 + frame*2)*Math.random()*16*Math.exp(-Math.pow((x-w*0.55)/60,2));
+      y += spike;
+    }
+    if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  scopeStatus.textContent = inFire
+    ? (document.documentElement.lang === 'sk' ? 'oheň zistený' : 'fire detected')
+    : (document.documentElement.lang === 'sk' ? 'počúva' : 'listening');
+  scopeStatus.classList.toggle('fire', inFire);
+
+  frame++;
+  requestAnimationFrame(draw);
+}
+draw();
+
+// ---- sequence step highlight on scroll ----
+const seqSteps = document.querySelectorAll('#sequence .seq-step');
+const seqObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const idx = Array.from(seqSteps).indexOf(entry.target);
+      seqSteps.forEach((s,i)=> s.classList.toggle('active', i<=idx));
+    }
+  });
+}, { threshold:0.6 });
+seqSteps.forEach(s=>seqObserver.observe(s));
+
+// ---- node exploded-view animation (plays once when in view) ----
+(function(){
+  const canvas = document.getElementById('node-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const FRAME_COUNT = 150;
+  const FRAME_PATH = (i) => `assets/frames/${String(i).padStart(4, '0')}.webp`;
+  const images = new Array(FRAME_COUNT);
+  let naturalW = 0, naturalH = 0;
+  let playing = false, played = false;
+
+  function sizeCanvas(){
+    if (!naturalW || !naturalH) return;
+    const maxW = Math.min(canvas.parentElement.clientWidth, 540);
+    const ratio = maxW / naturalW;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.style.width = `${naturalW * ratio}px`;
+    canvas.style.height = `${naturalH * ratio}px`;
+    canvas.width = Math.round(naturalW * ratio * dpr);
+    canvas.height = Math.round(naturalH * ratio * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function drawFrame(i){
+    const img = images[i];
+    if (!img || !img.complete) return;
+    const w = canvas.width / (window.devicePixelRatio || 1);
+    const h = canvas.height / (window.devicePixelRatio || 1);
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+  }
+
+  for (let i = 0; i < FRAME_COUNT; i++){
+    const img = new Image();
+    img.src = FRAME_PATH(i + 1);
+    img.onload = () => {
+      if (i === 0){
+        naturalW = img.naturalWidth;
+        naturalH = img.naturalHeight;
+        sizeCanvas();
+        drawFrame(0);
+      }
+    };
+    images[i] = img;
+  }
+
+  window.addEventListener('resize', () => {
+    sizeCanvas();
+    drawFrame(played ? FRAME_COUNT - 1 : 0);
+  });
+
+  function play(){
+    if (playing || played) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    playing = true;
+    const fps = 30;
+    let index = 0;
+    let last = performance.now();
+    function step(now){
+      const gap = 1000 / fps;
+      if (now - last >= gap){
+        const steps = Math.floor((now - last) / gap);
+        last = now;
+        index = Math.min(index + steps, FRAME_COUNT - 1);
+        drawFrame(index);
+      }
+      if (index < FRAME_COUNT - 1){
+        requestAnimationFrame(step);
+      } else {
+        playing = false;
+        played = true;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting){ play(); io.disconnect(); } });
+    }, { threshold: 0.25 });
+    io.observe(canvas);
+  } else {
+    play();
+  }
+})();
+
+// ---- subtle scroll reveals ----
+(function(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const targets = document.querySelectorAll('.sec-head, .problem-row, .problem-close, .seq-step, .confound-wrap, .stat-row, .ai-note, .hw-grid, .scale-list li, .results-band, .demo-note, .team-row, .contact-grid');
+  targets.forEach(el => el.classList.add('rv'));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px -8% 0px' });
+    targets.forEach(el => io.observe(el));
+  } else {
+    targets.forEach(el => el.classList.add('in'));
+  }
+})();
+</script>
 </body>
 </html>
