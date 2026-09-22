@@ -134,7 +134,7 @@ h1.hero-title .line2{ color:var(--ink-dim); font-style:italic; font-weight:380; 
   padding:13px 24px; border-radius:var(--radius); text-decoration:none; display:inline-block;
   border:1px solid transparent; transition:background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
 }
-.btn--solid{ background:var(--ember); color:#1B2115; }
+.btn--solid{ background:var(--ember); color:#1B21; }
 .btn--solid:hover{ background:var(--brand); color:#fff; transform:translateY(-1px); }
 .btn--ghost{ color:var(--ink); text-decoration:underline; text-underline-offset:4px; padding:13px 6px; }
 .btn--ghost:hover{ color:var(--ember); }
@@ -203,9 +203,9 @@ section:first-of-type{ border-top:none; }
   display:flex; align-items:center; justify-content:center; margin-bottom:18px;
   transition: background .35s ease, color .35s ease, border-color .35s ease;
 }
-.seq-step.active .num{ background:var(--ember); border-color:var(--ember); color:#1B2115; }
+.seq-step.active .num{ background:var(--ember); border-color:var(--ember); color:#1B21; }
 .seq-step .rule{
-  position:absolute; top:15px; left:30px; right:0; height:1px; background:var(--line);
+  position:absolute; top:px; left:30px; right:0; height:1px; background:var(--line);
 }
 .seq-step:last-child .rule{ display:none; }
 .seq-step h3{ font-size:1.1rem; margin-bottom:8px; font-weight:540; }
@@ -213,7 +213,7 @@ section:first-of-type{ border-top:none; }
 @media (max-width:860px){
   .sequence{ flex-direction:column; }
   .seq-step{ padding:0 0 30px 0; }
-  .seq-step .rule{ top:30px; left:15px; right:auto; width:1px; height:calc(100% - 30px); }
+  .seq-step .rule{ top:30px; left:px; right:auto; width:1px; height:calc(100% - 30px); }
 }
 
 /* ── WHY SOUND ── */
@@ -230,7 +230,7 @@ section:first-of-type{ border-top:none; }
 
 /* ── STATS (AI/dataset) ── */
 .stat-row{ display:flex; gap:72px; flex-wrap:wrap; margin-bottom:44px; padding-bottom:42px; border-bottom:1px solid var(--line); }
-.stat{ min-width:150px; }
+.stat{ min-width:0px; }
 .stat .num{ font-family:'Fraunces', serif; font-weight:440; font-size:3rem; color:var(--ember); line-height:1; }
 .stat .label{ color:var(--ink-dim); font-size:0.85rem; margin-top:12px; max-width:22ch; }
 .ai-note{
@@ -240,7 +240,7 @@ section:first-of-type{ border-top:none; }
 
 /* ── HARDWARE ── */
 #hardware{ background:var(--bg-2); }
-.hw-grid{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:60px; align-items:center; }
+.hw-grid{ display:grid; grid-template-columns:0.85fr 1.fr; gap:60px; align-items:center; }
 .hw-visual{ display:flex; justify-content:center; }
 .node-canvas{ display:block; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 20px 40px -30px rgba(27,33,21,0.35); }
 .spec-rows{ display:flex; flex-direction:column; margin-top:26px; }
@@ -345,7 +345,7 @@ footer a:hover{ color:var(--ember); }
 <section id="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="hero-tag" data-en='Semifinalist · FIRST Global Challenge 2026 · <b>Top 15 of 81 countries</b>' data-sk='Semifinalista · FIRST Global Challenge 2026 · <b>15 najlepších zo 81 krajín</b>'>Semifinalist · FIRST Global Challenge 2026 · <b>Top 15 of 81 countries</b></span>
+      <span class="hero-tag" data-en='Semifinalist · FIRST Global Challenge 2026 · <b>Top 5 of 81 countries</b>' data-sk='Semifinalista · FIRST Global Challenge 2026 · <b>5 najlepších z 81 krajín</b>'>Semifinalist · FIRST Global Challenge 2026 · <b>Top 5 of 81 countries</b></span>
       <h1 class="hero-title">
         <span data-en="A forest can't scream" data-sk="Les nemôže zakričať">A forest can't scream</span><br>
         <span class="line2" data-en="for help. So we gave it a voice." data-sk="o pomoc. Tak sme mu dali hlas.">for help. So we gave it a voice.</span>
@@ -566,7 +566,7 @@ footer a:hover{ color:var(--ember); }
 
     <div class="results-band">
       <div class="stat">
-        <div class="num mono">15 / 81</div>
+        <div class="num mono">5 / 81</div>
         <div class="label" data-en="semifinalist teams out of countries entered" data-sk="tímov v semifinále z krajín, ktoré sa zapojili">semifinalist teams out of countries entered</div>
       </div>
       <div class="stat">
